@@ -2,7 +2,11 @@ import { Server } from "socket.io";
 import { WEBRTC_EVENTS, WEBRTC_EVENT_HANDLERS } from "./events";
 
 const io = new Server({
-    allowEIO3: true
+    allowEIO3: true,
+    cors: {
+        origin: "*",
+        allowedHeaders: "*"
+    }
 });
 
 io.on("connection", (socket) => { 
@@ -10,11 +14,10 @@ io.on("connection", (socket) => {
   for (const event of socketEvents) {
     const eventHandler = WEBRTC_EVENT_HANDLERS[event];
     if (eventHandler) {
-      socket.on(event, (data: string) => {
+      socket.on(event, (data: object) => {
         console.log(data);
-        const parsedData = JSON.parse(data);
         eventHandler({
-          data: parsedData,
+          data,
           event,
           socket,
         });

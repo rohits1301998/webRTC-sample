@@ -5,9 +5,7 @@ import { ISocketEvent } from "../types/socket";
 const CONNECTED_PEERS = new Map<string, IPeer>();
 
 const joinChannel = async ({ data: newPeer, event, socket }: ISocketEvent<IPeer>) => {
-    if (CONNECTED_PEERS.size > 0) {
-        socket.broadcast.emit(WEBRTC_EVENTS.PEER_ADDED, newPeer);
-    }
+    socket.broadcast.emit(WEBRTC_EVENTS.PEER_ADDED, newPeer);
     CONNECTED_PEERS.set(newPeer.id, newPeer);
     socket.emit(WEBRTC_EVENTS.JOINED, CONNECTED_PEERS.size);
     socket.join(newPeer.id);
