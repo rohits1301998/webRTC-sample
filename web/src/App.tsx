@@ -4,10 +4,10 @@ import './App.css';
 import { useWebRTC } from './useWebRTC';
 
 function App() {
-  const {} = useWebRTC();  
+  const { sendMessage } = useWebRTC();  
   return (
     <div className="App">
-      
+      <button onClick={() => sendMessage("Hello test message!")}>Send message</button>
     </div>
   );
 }
