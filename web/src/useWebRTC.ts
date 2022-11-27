@@ -18,7 +18,7 @@ export const useWebRTC = () => {
         console.log(e.data);
       };
       dataChannel.onopen = (e) => console.log("Opened");
-      dataChannel.onclose = (e) => removePeer(peerId);
+      dataChannel.onclose = (e) => console.log("closed");
       const sdpOffer = await newPeerConnection.createOffer();
       await newPeerConnection.setLocalDescription(sdpOffer);
       peers.current.set(peerId, {
@@ -42,7 +42,7 @@ export const useWebRTC = () => {
           console.log(e.data);
         };
         dataChannel.onopen = (e) => console.log("Opened");
-        dataChannel.onclose = (e) => removePeer(peerId);
+        dataChannel.onclose = (e) => console.log("closed");
         peers.current.set(peerId, {
           connection: newPeerConnection,
           dataChannel,
@@ -62,6 +62,7 @@ export const useWebRTC = () => {
   }, []);
 
   const removePeer = useCallback((peerId: string) => {
+    peers.current.get(peerId)?.connection?.close();
     peers.current.delete(peerId);
   }, []);
 
@@ -84,6 +85,10 @@ export const useWebRTC = () => {
           to: peer.id,
           sdp: JSON.stringify(sdpOffer),
         });
+      });
+
+      on(WEBRTC_SOCKET_EVENTS.PEER_REMOVED, (peerId: string) => {
+        removePeer(peerId);
       });
 
       on(WEBRTC_SOCKET_EVENTS.PEER_ANSWER, (peerConnection: IConnectionRequest) => {

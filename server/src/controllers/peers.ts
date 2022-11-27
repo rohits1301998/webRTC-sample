@@ -15,8 +15,14 @@ const exchangeSdp = async ({ data: connectionRequest, event, socket }: ISocketEv
     socket.to(connectionRequest.to).emit(event, connectionRequest);
 }
 
+const leaveChannel = ({ data: peerId, event, socket }: ISocketEvent<string>) => {
+    socket.broadcast.emit(WEBRTC_EVENTS.PEER_REMOVED, peerId);
+    socket.leave(peerId);
+}
+
 
 export const peersController =  {
     joinChannel,
+    leaveChannel,
     exchangeSdp
 }
