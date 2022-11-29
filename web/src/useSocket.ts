@@ -7,7 +7,7 @@ export const useSocket = () => {
   const socketRef = useRef<Socket>();
 
   useEffect(() => {
-    socketRef.current = io("ws://localhost:8000", {
+    socketRef.current = io("ws://localhost:7000", {
         reconnectionAttempts: 3,
         transports: ["websocket"]
     });
