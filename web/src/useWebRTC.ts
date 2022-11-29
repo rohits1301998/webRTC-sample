@@ -1,11 +1,18 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { WEBRTC_SOCKET_EVENTS } from "./events";
-import { IConnectedPeer, IConnectionRequest, IPeer } from "./types/peer";
+import { IConnectedPeer, IConnectionRequest, IMessage, IPeer } from "./types/peer";
 import { useSocket } from "./useSocket";
+import uuid from 'react-uuid';
 
 export const useWebRTC = () => {
   const { emit, on, socketId } = useSocket();
   const peers = useRef<Map<string, IConnectedPeer>>(new Map());
+  const [messages, setMessages] = useState<IMessage[]>([]);
+
+
+  const addMessage = useCallback((message: IMessage) => {
+    setMessages(messages => ([...messages, message]));
+  }, []);
 
   const createPeerOffer = useCallback((peerId: string) => {
     return new Promise(async (resolve, reject) => {
@@ -15,7 +22,11 @@ export const useWebRTC = () => {
       };
       const dataChannel = newPeerConnection.createDataChannel("testChannel");
       dataChannel.onmessage = (e) => {
-        console.log(e.data);
+        addMessage({
+            peerId,
+            id: uuid(),
+            message: e.data
+        });
       };
       dataChannel.onopen = (e) => console.log("Opened");
       dataChannel.onclose = (e) => console.log("closed");
@@ -39,7 +50,11 @@ export const useWebRTC = () => {
       newPeerConnection.ondatachannel = (e) => {
         dataChannel = e.channel;
         dataChannel.onmessage = (e) => {
-          console.log(e.data);
+            addMessage({
+                peerId,
+                id: uuid(),
+                message: e.data
+            });
         };
         dataChannel.onopen = (e) => console.log("Opened");
         dataChannel.onclose = (e) => console.log("closed");
@@ -70,7 +85,12 @@ export const useWebRTC = () => {
     for (const peer of Array.from(peers.current.values())) {
       peer.dataChannel.send(message);
     }
-  }, []);
+    addMessage({
+        peerId: socketId,
+        id: uuid(),
+        message
+    });
+  }, [socketId]);
 
   useEffect(() => {
     if (socketId) {
@@ -108,5 +128,7 @@ export const useWebRTC = () => {
 
   return {
     sendMessage,
+    messages,
+    peerId: socketId
   };
 };

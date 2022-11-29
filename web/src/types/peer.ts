@@ -12,3 +12,9 @@ export interface IConnectionRequest {
     to: string;
     sdp: string;
 }
+
+export interface IMessage {
+    peerId: string;
+    message: string;
+    id: string;
+}
